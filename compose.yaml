@@ -12,7 +12,7 @@ services:
     image: ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPOSITORY}:latest
     build:
       context: .
-      volumes:
+    volumes:
         - /etc/letsencrypt:/etc/letsencrypt
     environment:
       NODE_ENV: production
