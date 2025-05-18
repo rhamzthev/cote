@@ -1,8 +1,8 @@
-import './PrivacyPolicy.css';
+import styles from './PrivacyPolicy.module.css';
 
 function PrivacyPolicy() {
   return (
-    <div className="privacy-policy">
+    <div className={styles.container}>
       <h1>Privacy Policy</h1>
       <p>Last updated: May 17, 2025</p>
       <p>

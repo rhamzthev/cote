@@ -1,4 +1,4 @@
-.auth-popup-overlay {
+.overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.auth-popup {
+.container {
   background-color: white;
   padding: 2rem;
   border-radius: 8px;
@@ -21,17 +21,17 @@
   width: 90%;
 }
 
-.auth-popup h2 {
+.container h2 {
   margin-top: 0;
   color: #333;
 }
 
-.auth-popup p {
+.container p {
   color: #666;
   margin-bottom: 1.5rem;
 }
 
-.auth-button {
+.button {
   background-color: #4285f4;
   color: white;
   border: none;
@@ -42,6 +42,6 @@
   transition: background-color 0.2s;
 }
 
-.auth-button:hover {
+.button:hover {
   background-color: #357abd;
 } 

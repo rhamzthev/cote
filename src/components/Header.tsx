@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import "./Header.css";
+import styles from "./Header.module.css";
 import starOutline from "/star_outline.svg";
 import starFilled from "/star_filled.svg";
 
@@ -71,15 +71,15 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus }: Hea
   };
 
   return (
-    <div className="header">
-      <div className="header__left">
-        <div className="header__logo">
+    <div className={styles.header}>
+      <div className={styles.left}>
+        <div className={styles.logo}>
           <a href="https://drive.google.com/drive">
             <img src="/logo.svg" alt="logo" />
           </a>
         </div>
-        <div className="header__file-info">
-          <div className="header__title-container">
+        <div className={styles.fileInfo}>
+          <div className={styles.titleContainer}>
             {isEditing ? (
               <input
                 ref={inputRef}
@@ -88,36 +88,36 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus }: Hea
                 onChange={(e) => setInputValue(e.target.value)}
                 onBlur={handleSubmit}
                 onKeyDown={handleKeyDown}
-                className="header__title-input"
+                className={styles.titleInput}
               />
             ) : (
               <h1
-                className="header__title-text"
+                className={styles.titleText}
                 onClick={() => setIsEditing(true)}
               >
                 {filename || 'Untitled'}
               </h1>
             )}
-            <div className="header__star" onClick={toggleStar}>
+            <div className={styles.star} onClick={toggleStar}>
               <img src={isStarred ? starFilled : starOutline} alt="Star" />
             </div>
-            <div className={`header__save-status header__save-status--${saveStatus}`}>
+            <div className={`${styles.saveStatus} ${styles[`saveStatus${saveStatus.charAt(0).toUpperCase() + saveStatus.slice(1)}`]}`}>
               {getSaveStatusText()}
             </div>
           </div>
-          {/* <div className="header__meta">
-            <div className="header__menu">
-              <button className="header__menu-item">File</button>
-              <button className="header__menu-item">Edit</button>
-              <button className="header__menu-item">View</button>
-              <button className="header__menu-item">Help</button>
+          {/* <div className={styles.meta}>
+            <div className={styles.menu}>
+              <button className={styles.menuItem}>File</button>
+              <button className={styles.menuItem}>Edit</button>
+              <button className={styles.menuItem}>View</button>
+              <button className={styles.menuItem}>Help</button>
             </div>
           </div> */}
         </div>
       </div>
-      {/* <div className="header__right">
-        <button className="header__action-btn header__action-btn--share">Share</button>
-        <div className="header__user-avatar">
+      {/* <div className={styles.right}>
+        <button className={`${styles.actionBtn} ${styles.actionBtnShare}`}>Share</button>
+        <div className={styles.userAvatar}>
           <img src="/user-avatar-placeholder.svg" alt="User" style={{ height: '32px', width: '32px', borderRadius: '50%' }} />
         </div>
       </div> */}

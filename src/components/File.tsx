@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import CodeEditor from "./Editor";
-import "./File.css";
+import styles from "./File.module.css";
 import Header from "./Header";
 import { useParams } from "react-router";
 import { useGoogleDrive } from "../hooks/useGoogleDrive";
@@ -204,7 +204,7 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
 
   // Render
   return (
-    <div className="file">
+    <div className={styles.container}>
       <AuthPopup isOpen={!isAuthorized} />
       {isAuthorized && (
         error ? (
@@ -224,7 +224,7 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
               fileId={id || ''}
             />
             <CodeEditor
-              className="editor"
+              className={styles.editor}
               value={content}
               language={getLanguage(filename)}
               theme={editorTheme}

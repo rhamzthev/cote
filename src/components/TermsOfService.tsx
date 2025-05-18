@@ -1,8 +1,8 @@
-import './TermsOfService.css';
+import styles from './TermsOfService.module.css';
 
 function TermsOfService() {
   return (
-    <div className="terms-of-service">
+    <div className={styles.container}>
       <h1>Terms and Conditions</h1>
       <p>Last updated: May 17, 2025</p>
       <p>

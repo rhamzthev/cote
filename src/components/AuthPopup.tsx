@@ -1,5 +1,5 @@
 import React from 'react';
-import './AuthPopup.css';
+import styles from './AuthPopup.module.css';
 import { useGoogleDrive } from '../hooks/useGoogleDrive';
 
 interface AuthPopupProps {
@@ -12,11 +12,11 @@ const AuthPopup: React.FC<AuthPopupProps> = ({ isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="auth-popup-overlay">
-      <div className="auth-popup">
+    <div className={styles.overlay}>
+      <div className={styles.container}>
         <h2>Sign in with Google</h2>
         <p>Please sign in with your Google account to access this application.</p>
-        <button className="auth-button" onClick={initiateAuth}>
+        <button className={styles.button} onClick={initiateAuth}>
           Sign in with Google
         </button>
       </div>

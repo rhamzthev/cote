@@ -1,5 +1,5 @@
 import React from 'react';
-import './ErrorScreen.css';
+import styles from './ErrorScreen.module.css';
 
 interface ErrorScreenProps {
   title: string;
@@ -9,13 +9,13 @@ interface ErrorScreenProps {
 
 const ErrorScreen: React.FC<ErrorScreenProps> = ({ title, message, details }) => {
   return (
-    <div className="error-screen">
-      <div className="error-content">
+    <div className={styles.container}>
+      <div className={styles.content}>
         <h1>{title}</h1>
         <p>{message}</p>
-        {details && <pre className="error-details">{details}</pre>}
+        {details && <pre className={styles.details}>{details}</pre>}
         <button 
-          className="error-button"
+          className={styles.button}
           onClick={() => window.location.href = '/'}
         >
           Return to Home

@@ -1,4 +1,4 @@
-.support-container {
+.container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,7 +7,7 @@
   background-color: var(--bg-primary);
 }
 
-.support-content {
+.content {
   max-width: 600px;
   text-align: center;
   padding: 2rem;
@@ -16,20 +16,20 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.support-content h1 {
+.content h1 {
   color: var(--text-primary);
   margin-bottom: 1.5rem;
   font-size: 2rem;
 }
 
-.support-content p {
+.content p {
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
   line-height: 1.6;
 }
 
-.support-email {
+.email {
   display: inline-block;
   color: var(--accent-color);
   font-size: 1.2rem;
@@ -40,7 +40,7 @@
   transition: all 0.3s ease;
 }
 
-.support-email:hover {
+.email:hover {
   background-color: var(--accent-color);
   color: var(--bg-primary);
 }

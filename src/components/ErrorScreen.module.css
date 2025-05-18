@@ -1,4 +1,4 @@
-.error-screen {
+.container {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.error-content {
+.content {
   background-color: white;
   padding: 2rem;
   border-radius: 8px;
@@ -21,21 +21,21 @@
   width: 90%;
 }
 
-.error-content h1 {
+.content h1 {
   color: #dc3545;
   margin-top: 0;
   margin-bottom: 1rem;
   font-size: 1.8rem;
 }
 
-.error-content p {
+.content p {
   color: #6c757d;
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
   line-height: 1.5;
 }
 
-.error-details {
+.details {
   background-color: #f8f9fa;
   padding: 1rem;
   border-radius: 4px;
@@ -47,7 +47,7 @@
   color: #495057;
 }
 
-.error-button {
+.button {
   background-color: #007bff;
   color: white;
   border: none;
@@ -58,6 +58,6 @@
   transition: background-color 0.2s;
 }
 
-.error-button:hover {
+.button:hover {
   background-color: #0056b3;
 } 

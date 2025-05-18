@@ -10,12 +10,12 @@ import Support from './components/Support.tsx'
 
 const router = createBrowserRouter([
   {
-    path: "/file/f/:id",
-    element: <File />,
-  },
-  {
     path: "/",
     element: <App />,
+  },
+  {
+    path: "/file/f/:id",
+    element: <File />,
   },
   {
     path: "/privacy-policy",
