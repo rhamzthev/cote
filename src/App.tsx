@@ -159,6 +159,12 @@ printMessage();
           <a href="https://github.com/rhamzthev/cote" className="social-link">
             GitHub
           </a>
+          <a href="/privacy-policy" className="social-link">
+            Privacy Policy
+          </a>
+          <a href="/terms-of-service" className="social-link">
+            Terms of Service
+          </a>
         </div>
       </footer>
     </div>

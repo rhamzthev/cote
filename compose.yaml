@@ -13,13 +13,12 @@ services:
     build:
       context: .
     volumes:
-        - /etc/letsencrypt:/etc/letsencrypt
+      - /etc/letsencrypt:/etc/letsencrypt
     environment:
       NODE_ENV: production
     ports:
       - 80:80
       - 443:443
-
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the

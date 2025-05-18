@@ -1,0 +1,44 @@
+.terms-of-service {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  line-height: 1.6;
+}
+
+.terms-of-service h1 {
+  margin-bottom: 1.5rem;
+}
+
+.terms-of-service h2 {
+  margin: 2.5rem 0 1.5rem;
+}
+
+.terms-of-service h3 {
+  margin: 2rem 0 1rem;
+}
+
+.terms-of-service h4 {
+  margin: 1.5rem 0 1rem;
+}
+
+.terms-of-service p {
+  margin-bottom: 1rem;
+}
+
+.terms-of-service ul {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.terms-of-service li {
+  margin-bottom: 0.75rem;
+}
+
+.terms-of-service a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.terms-of-service a:hover {
+  text-decoration: underline;
+}
