@@ -4,6 +4,21 @@ import { useState } from "react";
 
 function App() {
   const [isMockStarFilled, setIsMockStarFilled] = useState(false);
+  const [driveLink, setDriveLink] = useState("");
+  const [error, setError] = useState(false);
+
+  const handleDriveLinkSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(false); // Clear any previous errors
+    
+    // Extract file ID from Google Drive link
+    const fileIdMatch = driveLink.match(/^https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9-_]+)/);
+    if (fileIdMatch && fileIdMatch[1]) {
+      window.location.href = `/file/f/${fileIdMatch[1]}`;
+    } else {
+      setError(true);
+    }
+  };
 
   return (
     <div className="landing-page">
@@ -38,14 +53,24 @@ function App() {
             files directly from Google Drive into a powerful editor with all the
             features you need for efficient coding.
           </p>
-          <a
-            href="https://github.com/rhamzthev/cote"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cta-button"
-          >
-            Check it out on GitHub
-          </a>
+          <form onSubmit={handleDriveLinkSubmit} className="drive-link-form">
+            <div className="input-group">
+              <input
+                type="text"
+                placeholder="Paste your Google Drive link here"
+                value={driveLink}
+                onChange={(e) => {
+                  setDriveLink(e.target.value);
+                  setError(false); // Clear error when user types
+                }}
+                className={`drive-link-input ${error ? 'error' : ''}`}
+              />
+              {error && <div className="error-message">Please enter a valid Google Drive link (e.g., https://drive.google.com/file/d/<span className="file-id">YOUR_FILE_ID</span>/...)</div>}
+            </div>
+            <button type="submit" className="cta-button">
+              Open in Editor
+            </button>
+          </form>
         </div>
         <div className="hero-image">
           <div className="editor-mockup">
