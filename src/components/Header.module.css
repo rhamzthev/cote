@@ -177,3 +177,8 @@
 .saveStatusError {
   color: var(--error-color);
 }
+
+.saveStatusLocal {
+  color: #888;
+  font-style: italic;
+}

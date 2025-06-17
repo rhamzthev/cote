@@ -12,9 +12,10 @@ interface HeaderProps {
   onRename: (newFilename: string) => Promise<void>;
   onToggleStar: () => Promise<void>;
   saveStatus: SaveStatus;
+  isLocalMode?: boolean;
 }
 
-function Header({ filename, isStarred, onRename, onToggleStar, saveStatus }: HeaderProps) {
+function Header({ filename, isStarred, onRename, onToggleStar, saveStatus, isLocalMode = false }: HeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(filename);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +59,10 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus }: Hea
   };
 
   const getSaveStatusText = () => {
+    if (isLocalMode) {
+      return 'LOCAL MODE';
+    }
+    
     switch (saveStatus) {
       case 'saving':
         return 'Saving...';
@@ -74,7 +79,7 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus }: Hea
     <div className={styles.header}>
       <div className={styles.left}>
         <div className={styles.logo}>
-          <a href="https://drive.google.com/drive">
+          <a href="/">
             <img src="/logo.svg" alt="logo" />
           </a>
         </div>
@@ -101,7 +106,7 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus }: Hea
             <div className={styles.star} onClick={toggleStar}>
               <img src={isStarred ? starFilled : starOutline} alt="Star" />
             </div>
-            <div className={`${styles.saveStatus} ${styles[`saveStatus${saveStatus.charAt(0).toUpperCase() + saveStatus.slice(1)}`]}`}>
+            <div className={`${styles.saveStatus} ${isLocalMode ? styles.saveStatusLocal : styles[`saveStatus${saveStatus.charAt(0).toUpperCase() + saveStatus.slice(1)}`]}`}>
               {getSaveStatusText()}
             </div>
           </div>

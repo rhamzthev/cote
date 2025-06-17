@@ -7,6 +7,12 @@ interface FileContent {
   starred: boolean;
 }
 
+interface UserInfo {
+  id: string;
+  email?: string;
+  name?: string;
+}
+
 type FetchWithTokenRefresh = (path: string, options?: RequestInit) => Promise<Response>;
 type RefreshAccessToken = () => Promise<void>;
 
@@ -83,8 +89,17 @@ export const useGoogleDrive = () => {
 
   const initiateAuth = async () => {
     try {
-      // Get the current path, defaulting to root if not available
-      const returnUrl = window.location.pathname || '/';
+      // Get the current path and search parameters
+      const { pathname, search } = window.location;
+      
+      // Default to root if not available
+      let returnUrl = pathname || '/';
+      
+      // If we're on the file page, include the search params (state parameter)
+      if (pathname === '/file' && search) {
+        returnUrl = `${pathname}${search}`;
+      }
+      
       const response = await fetch(`${API_CONFIG.baseUrl}/auth/google/url?returnUrl=${encodeURIComponent(returnUrl)}`);
       const data = await response.json();
       window.location.href = data.url;
@@ -213,6 +228,39 @@ export const useGoogleDrive = () => {
     }
   };
 
+  // Check if current user matches the given userId
+  const checkUserMatch = async (userId: string): Promise<boolean> => {
+    try {
+      const response = await fetchWithTokenRefresh('/api/auth/user');
+      
+      if (response.ok) {
+        const currentUser: UserInfo = await response.json();
+        return currentUser.id === userId;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking user match:', error);
+      return false;
+    }
+  };
+
+  // Get current user info
+  const getCurrentUser = async (): Promise<UserInfo | null> => {
+    try {
+      const response = await fetchWithTokenRefresh('/api/auth/user');
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  };
+
   const logout = async () => {
     try {
       await fetchWithTokenRefresh('/api/auth/logout', {
@@ -235,6 +283,8 @@ export const useGoogleDrive = () => {
     toggleFileStar,
     updateFileContent,
     refreshAccessToken,
-    logout
+    logout,
+    checkUserMatch,
+    getCurrentUser
   };
 }; 

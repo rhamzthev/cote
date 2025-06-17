@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import CodeEditor from "./Editor";
 import styles from "./File.module.css";
 import Header from "./Header";
-import { useParams } from "react-router";
+import { useLocation } from "react-router";
 import { useGoogleDrive } from "../hooks/useGoogleDrive";
 import AuthPopup from "./AuthPopup";
 import ErrorScreen from "./ErrorScreen";
@@ -19,6 +19,14 @@ type FileError = {
 interface FileProps {
   initialContent?: string;
   initialFilename?: string;
+}
+
+// State parameter interface
+interface StateParam {
+  ids: string[];
+  action: string;
+  userId: string;
+  exportIds?: string[];
 }
 
 // Language mapping for syntax highlighting
@@ -118,22 +126,104 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
   const [isStarred, setIsStarred] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [error, setError] = useState<FileError>(null);
+  const [fileId, setFileId] = useState<string>('');
+  const [isLocalMode, setIsLocalMode] = useState(false);
+  const [userId, setUserId] = useState<string>('');
 
   // Refs
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const hasInitializedRef = useRef(false);
 
   // Hooks
-  const { id } = useParams();
-  const { getFile, updateFileContent, updateFilename, toggleFileStar, isAuthorized } = useGoogleDrive();
+  const location = useLocation();
+  const { 
+    getFile, 
+    updateFileContent, 
+    updateFilename, 
+    toggleFileStar, 
+    isAuthorized, 
+    initiateAuth, 
+    logout,
+    checkUserMatch
+  } = useGoogleDrive();
   const editorTheme = useColorScheme();
+
+  // Parse state parameter from URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const stateParam = searchParams.get('state');
+    
+    if (stateParam) {
+      try {
+        const state = JSON.parse(stateParam) as StateParam;
+        
+        // Step 1: Verify action is "open" and ids field is present
+        if (state.action !== 'open' || !state.ids || state.ids.length === 0) {
+          setError({
+            title: 'Invalid File Request',
+            message: 'The state parameter contains invalid action or missing file IDs.',
+            details: `Expected action "open" but got "${state.action}". File IDs ${state.ids ? 'present' : 'missing'}.`
+          });
+          return;
+        }
+
+        // Set file ID
+        setFileId(state.ids[0]);
+        setIsLocalMode(false);
+        
+        // Step 2: Handle userId for session management
+        if (state.userId) {
+          setUserId(state.userId);
+          // Handle user session (will be implemented in useEffect below)
+        }
+        
+      } catch (error) {
+        console.error('Error parsing state parameter:', error);
+        setError({
+          title: 'Invalid State Parameter',
+          message: 'Could not parse the state parameter from the URL.',
+          details: error instanceof Error ? error.message : 'Unknown error occurred'
+        });
+      }
+    } else {
+      // No state parameter - enable local mode
+      setIsLocalMode(true);
+      console.log('Local mode enabled - no Google Drive integration');
+    }
+  }, [location.search]);
+
+  // Handle user session based on userId
+  useEffect(() => {
+    // Skip if in local mode or no userId
+    if (isLocalMode || !userId) return;
+    
+    const handleUserSession = async () => {
+      try {
+        // Check if current user matches userId from state
+        const isUserMatch = await checkUserMatch(userId);
+        
+        if (!isUserMatch) {
+          // User IDs don't match, logout and re-authenticate
+          console.log('User ID mismatch, switching accounts');
+          await logout();
+          await initiateAuth();
+        }
+      } catch (error) {
+        console.error('Error handling user session:', error);
+      }
+    };
+    
+    handleUserSession();
+  }, [userId, isLocalMode, logout, initiateAuth, checkUserMatch]);
 
   // File fetching logic
   useEffect(() => {
     const fetchFile = async () => {
+      if (!fileId) return;
+      
       try {
-        console.log('Fetching file with ID:', id);
-        const file = await getFile(id || '');
+        console.log('Fetching file with ID:', fileId);
+        const file = await getFile(fileId);
         console.log('Received file data:', file);
         setContent(file.content);
         setFilename(file.filename);
@@ -149,20 +239,22 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
       }
     };
 
-    if (isAuthorized && !hasInitializedRef.current) {
+    if (isAuthorized && fileId && !hasInitializedRef.current && !isLocalMode) {
       fetchFile();
     }
-  }, [getFile, id, isAuthorized]);
+  }, [getFile, fileId, isAuthorized, isLocalMode]);
 
   // Content change handler
   const handleContentChange = useCallback((newContent: string) => {
     setContent(newContent);
-    setSaveStatus('saving');
-  }, []);
+    if (!isLocalMode) {
+      setSaveStatus('saving');
+    }
+  }, [isLocalMode]);
 
   // Auto-save logic with debouncing
   useEffect(() => {
-    if (!hasInitializedRef.current) return;
+    if (isLocalMode || !hasInitializedRef.current || !fileId) return;
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -170,7 +262,7 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
 
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        await updateFileContent(id || '', content);
+        await updateFileContent(fileId, content);
         setSaveStatus('saved');
       } catch (error) {
         setSaveStatus('error');
@@ -183,17 +275,36 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [content, id, updateFileContent]);
+  }, [content, fileId, updateFileContent, isLocalMode]);
 
   // File operations
   const handleRename = async (newFilename: string) => {
-    const { name } = await updateFilename(id || '', newFilename);
-    setFilename(name);
+    setFilename(newFilename);
+    
+    if (!isLocalMode && fileId) {
+      try {
+        const { name } = await updateFilename(fileId, newFilename);
+        setFilename(name);
+      } catch (error) {
+        console.error('Error updating filename:', error);
+      }
+    }
   };
 
   const handleStar = async () => {
-    const starred = await toggleFileStar(id || '');
-    setIsStarred(starred);
+    if (isLocalMode) {
+      setIsStarred(!isStarred); // Just toggle locally
+      return;
+    }
+    
+    if (fileId) {
+      try {
+        const starred = await toggleFileStar(fileId);
+        setIsStarred(starred);
+      } catch (error) {
+        console.error('Error toggling star:', error);
+      }
+    }
   };
 
   // Helper functions
@@ -205,8 +316,8 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
   // Render
   return (
     <div className={styles.container}>
-      <AuthPopup isOpen={!isAuthorized} />
-      {isAuthorized && (
+      {!isLocalMode && <AuthPopup isOpen={!isAuthorized} />}
+      {(isAuthorized || isLocalMode) && (
         error ? (
           <ErrorScreen
             title={error.title}
@@ -220,8 +331,9 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
               isStarred={isStarred}
               onRename={handleRename}
               onToggleStar={handleStar}
-              saveStatus={saveStatus}
-              fileId={id || ''}
+              saveStatus={isLocalMode ? 'saved' : saveStatus}
+              fileId={fileId}
+              isLocalMode={isLocalMode}
             />
             <CodeEditor
               className={styles.editor}

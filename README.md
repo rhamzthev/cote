@@ -1,17 +1,47 @@
 # Côté
 
-A powerful web-based code editor that integrates seamlessly with Google Drive. Côté brings professional code editing capabilities directly into your Google Drive workflow, allowing you to edit code files without leaving your browser.
+A powerful web-based code editor that integrates seamlessly with Google Drive&trade;. Côté brings professional code editing capabilities directly into your Google Drive&trade; workflow, allowing you to edit code files without leaving your browser.
 
 ## 🚀 Features
 
-- **Google Drive Integration**: Open and edit files directly from your Google Drive
+- **Google Drive&trade; Integration**: Open and edit files directly from your Google Drive&trade;
 - **Professional Code Editor**: Powered by Monaco Editor (same engine as VS Code)
-- **Smart File Management**: Star, organize, and manage your code files within Google Drive
-- **Auto-Save**: Automatic saving and syncing with Google Drive
+- **Smart File Management**: Star, organize, and manage your code files within Google Drive&trade;
+- **Auto-Save**: Automatic saving and syncing with Google Drive&trade;
 - **Theme Support**: Light and dark themes that respect your system preferences
 - **Syntax Highlighting**: Full support for multiple programming languages
 - **Code Completion**: Intelligent code suggestions and completions
 - **Direct File Operations**: Rename and manage files without leaving the editor
+
+## 🔄 Google Drive Integration
+
+Côté integrates with Google Drive using the state parameter approach described in the [Google Drive API documentation](https://developers.google.com/workspace/drive/api/guides/enable-sdk#construct).
+
+### State Parameter Format
+
+When opening a file from Google Drive, the URL will include a state parameter with the following format:
+
+```
+/file?state={"ids":["FILE_ID"],"action":"open","userId":"USER_ID"}
+```
+
+This approach enables seamless integration with Google Drive's UI, allowing Côté to appear as an option in the "Open with" menu for supported file types.
+
+### State Parameter Handling
+
+When receiving a state parameter, Côté follows these steps:
+
+1. Verifies that the action field has a value of "open" and the ids field is present
+2. Uses the userId value to create a new session for the user or switch accounts if needed
+3. Uses the files.get method to check permissions, fetch file metadata, and download content
+
+### Required API Endpoints
+
+The backend API must support the following endpoints for proper state parameter handling:
+
+- `/api/auth/user` - Returns information about the currently logged-in user
+- `/api/auth/logout` - Logs out the current user
+- `/api/drive/files/:id` - Gets file metadata and content
 
 ## 🗺️ Roadmap
 
@@ -21,7 +51,7 @@ A powerful web-based code editor that integrates seamlessly with Google Drive. C
 - Profile features including account switching and sharing
 
 ### Current Roadblocks
-- **OAuth & Store Listing Verification**: Currently working through Google's verification process to make Côté available directly in Google Drive.
+- **OAuth & Store Listing Verification**: Currently working through Google's verification process to make Côté available directly in Google Drive&trade;.
 
 ## 📋 Prerequisites
 

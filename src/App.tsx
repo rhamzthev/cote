@@ -4,20 +4,27 @@ import { useState } from "react";
 
 function App() {
   const [isMockStarFilled, setIsMockStarFilled] = useState(false);
-  const [driveLink, setDriveLink] = useState("");
-  const [error, setError] = useState(false);
+  // const [driveLink, setDriveLink] = useState("");
+  // const [error, setError] = useState(false);
 
   const handleDriveLinkSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(false); // Clear any previous errors
-    
-    // Extract file ID from Google Drive link
-    const fileIdMatch = driveLink.match(/^https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9-_]+)/);
-    if (fileIdMatch && fileIdMatch[1]) {
-      window.location.href = `/file/f/${fileIdMatch[1]}`;
-    } else {
-      setError(true);
-    }
+    // setError(false); // Clear any previous errors
+
+    // // Extract file ID from Google Drive&trade; link
+    // const fileIdMatch = driveLink.match(/^https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9-_]+)/);
+    // if (fileIdMatch && fileIdMatch[1]) {
+    //   const fileId = fileIdMatch[1];
+    //   const state = JSON.stringify({
+    //     ids: [fileId],
+    //     action: "open",
+    //     userId: "",
+    //     resourceKeys: {}
+    //   });
+    window.location.href = `/file`;
+    // } else {
+    //   setError(true);
+    // }
   };
 
   return (
@@ -47,28 +54,15 @@ function App() {
 
       <section className="hero">
         <div className="hero-content">
-          <h2 className="hero-title">Code Right Inside Google Drive</h2>
+          <h2 className="hero-title">Code Right Inside Google Drive&trade;</h2>
           <p className="hero-subtitle">
-            Cote is a web-based text/code editor tailored for Google Drive. Open
-            files directly from Google Drive into a powerful editor with all the
+            Cote is a web-based text/code editor tailored for Google Drive&trade;. Open
+            files directly from Google Drive&trade; into a powerful editor with all the
             features you need for efficient coding.
           </p>
           <form onSubmit={handleDriveLinkSubmit} className="drive-link-form">
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="Paste your Google Drive link here"
-                value={driveLink}
-                onChange={(e) => {
-                  setDriveLink(e.target.value);
-                  setError(false); // Clear error when user types
-                }}
-                className={`drive-link-input ${error ? 'error' : ''}`}
-              />
-              {error && <div className="error-message">Please enter a valid Google Drive link (e.g., https://drive.google.com/file/d/<span className="file-id">YOUR_FILE_ID</span>/...)</div>}
-            </div>
             <button type="submit" className="cta-button">
-              Open in Editor
+              Open Editor
             </button>
           </form>
         </div>
@@ -109,7 +103,7 @@ printMessage();
           <div className="feature-icon">⭐</div>
           <h3 className="feature-title">Star and Organize</h3>
           <p className="feature-description">
-            Star files just like in Google Drive. Keep your important code files
+            Star files just like in Google Drive&trade;. Keep your important code files
             organized and easily accessible.
           </p>
         </div>
@@ -119,7 +113,7 @@ printMessage();
           <h3 className="feature-title">Auto-Save</h3>
           <p className="feature-description">
             Never lose your work with automatic saving. Your changes are
-            constantly synced back to Google Drive.
+            constantly synced back to Google Drive&trade;.
           </p>
         </div>
 
@@ -136,7 +130,7 @@ printMessage();
           <div className="feature-icon">📂</div>
           <h3 className="feature-title">Direct Integration</h3>
           <p className="feature-description">
-            Open files directly from Google Drive. No need to download, edit
+            Open files directly from Google Drive&trade;. No need to download, edit
             locally, and re-upload.
           </p>
         </div>
@@ -146,7 +140,7 @@ printMessage();
           <h3 className="feature-title">File Management</h3>
           <p className="feature-description">
             Rename your files directly from the editor. Changes sync seamlessly
-            with your Google Drive.
+            with your Google Drive&trade;.
           </p>
         </div>
 
@@ -164,14 +158,14 @@ printMessage();
         <div className="hero-content">
           <h2 className="hero-title">Why Côté?</h2>
           <p className="hero-subtitle">
-            Côté brings professional code editing capabilities to Google Drive.
+            Côté brings professional code editing capabilities to Google Drive&trade;.
             Whether you're a professional developer or just learning to code,
             Côté provides a seamless experience for managing your code files
             within your existing Google ecosystem.
           </p>
           <p className="hero-subtitle">
             With features like syntax highlighting, code completion, and the
-            familiar Google Drive interface for file operations, you can focus
+            familiar Google Drive&trade; interface for file operations, you can focus
             on writing great code without switching between different
             applications.
           </p>

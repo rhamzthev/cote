@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "/file/f/:id",
+    path: "/file",
     element: <File />,
   },
   {
