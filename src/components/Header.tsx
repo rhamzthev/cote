@@ -2,23 +2,40 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./Header.module.css";
 import starOutline from "/star_outline.svg";
 import starFilled from "/star_filled.svg";
+import type { GoogleUser } from "../hooks/useGoogleDrive";
 
 type SaveStatus = 'saved' | 'saving' | 'error';
 
 interface HeaderProps {
   filename: string;
-  fileId: string;
   isStarred: boolean;
-  onRename: (newFilename: string) => Promise<void>;
-  onToggleStar: () => Promise<void>;
+  onRename: (newFilename: string) => void;
+  onStar: () => void;
   saveStatus: SaveStatus;
-  isLocalMode?: boolean;
+  isLocalMode: boolean;
+  isAuthorized: boolean;
+  currentUser: GoogleUser | null;
+  onInitiateAuth: () => void;
+  onLogout: () => void;
 }
 
-function Header({ filename, isStarred, onRename, onToggleStar, saveStatus, isLocalMode = false }: HeaderProps) {
+function Header({ 
+  filename, 
+  isStarred, 
+  onRename, 
+  onStar, 
+  saveStatus, 
+  isLocalMode,
+  isAuthorized,
+  currentUser,
+  onInitiateAuth,
+  onLogout
+}: HeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(filename);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // Update input value when filename changes
   useEffect(() => {
@@ -32,6 +49,22 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus, isLoc
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  // Click outside to close profile menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+
+    if (showProfileMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProfileMenu]);
 
   const handleSubmit = async () => {
     if (inputValue !== filename) {
@@ -54,13 +87,9 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus, isLoc
     }
   };
 
-  const toggleStar = () => {
-    onToggleStar();
-  };
-
   const getSaveStatusText = () => {
     if (isLocalMode) {
-      return 'LOCAL MODE';
+      return 'Local Mode';
     }
     
     switch (saveStatus) {
@@ -103,7 +132,7 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus, isLoc
                 {filename || 'Untitled'}
               </h1>
             )}
-            <div className={styles.star} onClick={toggleStar}>
+            <div className={styles.star} onClick={onStar}>
               <img src={isStarred ? starFilled : starOutline} alt="Star" />
             </div>
             <div className={`${styles.saveStatus} ${isLocalMode ? styles.saveStatusLocal : styles[`saveStatus${saveStatus.charAt(0).toUpperCase() + saveStatus.slice(1)}`]}`}>
@@ -120,12 +149,39 @@ function Header({ filename, isStarred, onRename, onToggleStar, saveStatus, isLoc
           </div> */}
         </div>
       </div>
-      {/* <div className={styles.right}>
-        <button className={`${styles.actionBtn} ${styles.actionBtnShare}`}>Share</button>
-        <div className={styles.userAvatar}>
-          <img src="/user-avatar-placeholder.svg" alt="User" style={{ height: '32px', width: '32px', borderRadius: '50%' }} />
-        </div>
-      </div> */}
+      <div className={styles.right}>
+        {isAuthorized && currentUser ? (
+          <div className={styles.profileContainer} ref={profileMenuRef}>
+            <img
+              src={currentUser.picture}
+              alt="Profile"
+              className={styles.profilePicture}
+              onClick={() => setShowProfileMenu(prev => !prev)}
+            />
+            {showProfileMenu && (
+              <div className={styles.profileMenu}>
+                <div className={styles.profileMenuHeader}>
+                  <span className={styles.profileMenuEmail}>{currentUser.email}</span>
+                  <button onClick={() => setShowProfileMenu(false)} className={styles.closeButton}>&times;</button>
+                </div>
+                <div className={styles.profileInfo}>
+                  <img src={currentUser.picture} alt="Profile" className={styles.profileMenuPicture} />
+                  <div className={styles.profileMenuName}>Hi, {currentUser.name?.split(' ')[0]}!</div>
+                </div>
+                <div className={styles.profileMenuActions}>
+                  <button className={`${styles.actionBtn} ${styles.signOutButton}`} onClick={onLogout}>
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button className={`${styles.actionBtn} ${styles.actionBtnShare}`} onClick={onInitiateAuth}>
+            Sign In
+          </button>
+        )}
+      </div>
     </div>
   );
 }

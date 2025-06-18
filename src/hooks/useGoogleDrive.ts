@@ -7,10 +7,12 @@ interface FileContent {
   starred: boolean;
 }
 
-interface UserInfo {
-  id: string;
-  email?: string;
-  name?: string;
+// This should match the user profile information you get from Google
+export interface GoogleUser {
+  sub: string; // The unique user ID
+  name: string;
+  email: string;
+  picture: string;
 }
 
 type FetchWithTokenRefresh = (path: string, options?: RequestInit) => Promise<Response>;
@@ -18,6 +20,7 @@ type RefreshAccessToken = () => Promise<void>;
 
 export const useGoogleDrive = () => {
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<GoogleUser | null>(null);
 
   // Declare refreshAccessToken first since it's used by fetchWithTokenRefresh
   const refreshAccessToken = useCallback<RefreshAccessToken>(async () => {
@@ -38,6 +41,7 @@ export const useGoogleDrive = () => {
     } catch (error) {
       console.error('Failed to refresh token:', error);
       setIsAuthorized(false);
+      setCurrentUser(null);
     }
   }, []);
 
@@ -68,26 +72,30 @@ export const useGoogleDrive = () => {
   }, [refreshAccessToken]);
 
   useEffect(() => {
-    // Check auth status from server
+    // Check auth status and get user info from server
     const checkAuthStatus = async () => {
       try {
         const response = await fetchWithTokenRefresh('/api/auth/status');
         
         if (response.ok) {
+          const user = await response.json();
           setIsAuthorized(true);
+          setCurrentUser(user);
         } else {
           setIsAuthorized(false);
+          setCurrentUser(null);
         }
       } catch (error) {
         console.error('Failed to check auth status:', error);
         setIsAuthorized(false);
+        setCurrentUser(null);
       }
     };
 
     checkAuthStatus();
   }, [fetchWithTokenRefresh]);
 
-  const initiateAuth = async () => {
+  const initiateAuth = async (options?: { loginHint?: string }) => {
     try {
       // Get the current path and search parameters
       const { pathname, search } = window.location;
@@ -100,7 +108,13 @@ export const useGoogleDrive = () => {
         returnUrl = `${pathname}${search}`;
       }
       
-      const response = await fetch(`${API_CONFIG.baseUrl}/auth/google/url?returnUrl=${encodeURIComponent(returnUrl)}`);
+      let authUrl = `${API_CONFIG.baseUrl}/auth/google/url?returnUrl=${encodeURIComponent(returnUrl)}`;
+      
+      if (options?.loginHint) {
+        authUrl += `&login_hint=${encodeURIComponent(options.loginHint)}`;
+      }
+
+      const response = await fetch(authUrl);
       const data = await response.json();
       window.location.href = data.url;
     } catch (error) {
@@ -172,12 +186,16 @@ export const useGoogleDrive = () => {
     }
   };
 
-  const toggleFileStar = async (fileId: string): Promise<boolean> => {
+  const toggleFileStar = async (fileId: string, starred: boolean): Promise<boolean> => {
     try {
       const response = await fetchWithTokenRefresh(
         `/api/drive/files/${fileId}/star`,
         {
           method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ starred }),
         }
       );
 
@@ -228,63 +246,24 @@ export const useGoogleDrive = () => {
     }
   };
 
-  // Check if current user matches the given userId
-  const checkUserMatch = async (userId: string): Promise<boolean> => {
-    try {
-      const response = await fetchWithTokenRefresh('/api/auth/user');
-      
-      if (response.ok) {
-        const currentUser: UserInfo = await response.json();
-        return currentUser.id === userId;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking user match:', error);
-      return false;
-    }
-  };
-
-  // Get current user info
-  const getCurrentUser = async (): Promise<UserInfo | null> => {
-    try {
-      const response = await fetchWithTokenRefresh('/api/auth/user');
-      
-      if (response.ok) {
-        return await response.json();
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      return null;
-    }
-  };
-
   const logout = async () => {
     try {
-      await fetchWithTokenRefresh('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (error) {
-      console.error('Failed to logout:', error);
+      await fetchWithTokenRefresh('/api/auth/logout', { method: 'POST' });
     } finally {
       setIsAuthorized(false);
+      setCurrentUser(null);
     }
   };
 
   return {
     isAuthorized,
+    currentUser,
     initiateAuth,
+    logout,
     getFile,
     updateFilename,
-    getFileStarStatus,
     toggleFileStar,
     updateFileContent,
-    refreshAccessToken,
-    logout,
-    checkUserMatch,
-    getCurrentUser
+    getFileStarStatus,
   };
-}; 
+};

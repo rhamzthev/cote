@@ -141,10 +141,10 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
     updateFileContent, 
     updateFilename, 
     toggleFileStar, 
-    isAuthorized, 
+    isAuthorized,
+    currentUser,
     initiateAuth, 
-    logout,
-    checkUserMatch
+    logout
   } = useGoogleDrive();
   const editorTheme = useColorScheme();
 
@@ -194,27 +194,10 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
 
   // Handle user session based on userId
   useEffect(() => {
-    // Skip if in local mode or no userId
+    // This feature is not fully implemented yet.
+    // The purpose is to ensure the signed-in user matches the userId in the URL.
     if (isLocalMode || !userId) return;
-    
-    const handleUserSession = async () => {
-      try {
-        // Check if current user matches userId from state
-        const isUserMatch = await checkUserMatch(userId);
-        
-        if (!isUserMatch) {
-          // User IDs don't match, logout and re-authenticate
-          console.log('User ID mismatch, switching accounts');
-          await logout();
-          await initiateAuth();
-        }
-      } catch (error) {
-        console.error('Error handling user session:', error);
-      }
-    };
-    
-    handleUserSession();
-  }, [userId, isLocalMode, logout, initiateAuth, checkUserMatch]);
+  }, [userId, isLocalMode, logout, initiateAuth]);
 
   // File fetching logic
   useEffect(() => {
@@ -299,7 +282,7 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
     
     if (fileId) {
       try {
-        const starred = await toggleFileStar(fileId);
+        const starred = await toggleFileStar(fileId, !isStarred);
         setIsStarred(starred);
       } catch (error) {
         console.error('Error toggling star:', error);
@@ -316,7 +299,7 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
   // Render
   return (
     <div className={styles.container}>
-      {!isLocalMode && <AuthPopup isOpen={!isAuthorized} />}
+      {!isLocalMode && !isAuthorized && <AuthPopup onAuth={initiateAuth} />}
       {(isAuthorized || isLocalMode) && (
         error ? (
           <ErrorScreen
@@ -326,14 +309,17 @@ function File({ initialContent = '', initialFilename = 'Untitled file' }: FilePr
           />
         ) : (
           <>
-            <Header 
+            <Header
               filename={filename}
               isStarred={isStarred}
               onRename={handleRename}
-              onToggleStar={handleStar}
+              onStar={handleStar}
               saveStatus={isLocalMode ? 'saved' : saveStatus}
-              fileId={fileId}
               isLocalMode={isLocalMode}
+              isAuthorized={isAuthorized}
+              currentUser={currentUser}
+              onInitiateAuth={() => initiateAuth()}
+              onLogout={logout}
             />
             <CodeEditor
               className={styles.editor}
